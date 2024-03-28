@@ -6,7 +6,7 @@
 #    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 14:06:15 by gbrunet           #+#    #+#              #
-#    Updated: 2024/03/27 15:19:58 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/03/28 09:33:52 by gbrunet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,9 +38,15 @@ OBJ_DIR = objects/
 
 SRC = main ScalarConverter
 
+SRC_TESTER = tester
+
 SRC_FILES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC)))
 
+SRC_TESTER_FILES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC_TESTER)))
+
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC)))
+
+OBJ_TESTER_FILES = $(addprefix $(OBJ_DIR), $(addsuffix .o, $(SRC_TESTER)))
 
 COMPTEUR = 0
 
@@ -58,6 +64,10 @@ $(NAME) : $(OBJ_FILES)
 	$(CC) $(OBJ_FILES) -o $(NAME)
 	@echo "$(_GREEN)$(NAME) created.$(_END)"
 
+tester : $(OBJ_TESTER_FILES)
+	$(CC) $(OBJ_TESTER_FILES) -o tester
+	@echo "$(_GREEN)tester created.$(_END)"	
+
 clean :
 	@echo "$(_YELLOW)$(NAME): Clean...$(_END)"
 	$(RM) -rf $(OBJ_DIR)
@@ -68,6 +78,7 @@ fclean :
 	$(RM) -rf $(OBJ_DIR)
 	@echo "$(_GREEN)$(NAME): Binaries deleted.$(_END)"
 	$(RM) $(NAME)
+	$(RM) tester
 	@echo "$(_GREEN)$(NAME) deleted.$(_END)"
 
 re :

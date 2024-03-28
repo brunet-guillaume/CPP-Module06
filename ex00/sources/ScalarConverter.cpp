@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 12:12:10 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/28 09:12:39 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/28 10:12:00 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,12 +148,12 @@ static bool	intOverflow(std::string str) {
 	} else if (str[0] == '+') {
 		if (str.length() > 11)
 			return (true);
-		else if (str.length() == 11 && str.compare("+2147483648") > 0)
+		else if (str.length() == 11 && str.compare("+2147483647") > 0)
 			return (true);
 	} else {
 		if (str.length() > 10)
 			return (true);
-		else if (str.length() == 10 && str.compare("2147483648") > 0)
+		else if (str.length() == 10 && str.compare("2147483647") > 0)
 			return (true);
 	}
 	return (false);
@@ -189,16 +189,9 @@ static void	convertFloat(std::string str) {
 	bool	int_overflow = false;
 	float	nb;	
 	
-	errno = 0;
 	nb = std::strtof(str.c_str(), NULL);
-	if (errno == ERANGE) {
-		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		std::cout << BOLD << " float: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		std::cout << BOLD << "double: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		return ;
-	}
-	if (nb < static_cast<float>(INT_MIN) || nb > static_cast<float>(INT_MAX))
+	if (static_cast<double>(nb) < static_cast<double>(INT_MIN) || nb > static_cast<double>(INT_MAX)
+			|| str == "+inff" || str == "-inff" || str == "nanf")
 		int_overflow = true;
 	if (!int_overflow) {
 		if (isascii(nb)) {
@@ -224,16 +217,9 @@ static void	convertDouble(std::string str) {
 	bool	int_overflow = false;
 	double	nb;
 
-	errno = 0;
 	nb = std::strtod(str.c_str(), NULL);
-	if (errno == ERANGE) {
-		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		std::cout << BOLD << " float: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		std::cout << BOLD << "double: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
-		return ;
-	}
-	if (nb < static_cast<double>(INT_MIN) || nb > static_cast<double>(INT_MAX))
+	if (nb < static_cast<double>(INT_MIN) || nb > static_cast<double>(INT_MAX)
+			|| str == "+inf" || str == "-inf" || str == "nan")
 		int_overflow = true;
 	if (!int_overflow) {
 		if (isascii(nb)) {
