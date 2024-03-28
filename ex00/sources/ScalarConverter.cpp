@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 12:12:10 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/03/27 19:05:02 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/03/28 09:12:39 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <ctype.h>
 #include <cstdlib>
 #include <climits>
+#include <cerrno>
+#include "style.h"
 
 ScalarConverter::ScalarConverter(){};
 ScalarConverter::ScalarConverter(const ScalarConverter &cpy) {(void)cpy;};
@@ -57,7 +59,7 @@ static bool	isFloat(std::string str) {
 		i++;
 	if (str[i] == '.')
 		return (false);
-	if (str.compare("+inff") == 0 || str.compare("-inff") == 0 || str.compare("nanf"))
+	if (str == "+inff" || str == "-inff" || str == "nanf")
 		return (true);
 	for (; i < str.length() - 1; i++) {
 		if (isdigit(str[i])) {
@@ -80,7 +82,7 @@ static bool	isDouble(std::string str) {
 		i++;
 	if (str[i] == '.')
 		return (false);
-	if (str.compare("+inf") == 0 || str.compare("-inf") == 0 || str.compare("nan"))
+	if (str == "+inf" || str == "-inf" || str == "nan")
 		return (true);
 	for (; i < str.length(); i++) {
 		if (isdigit(str[i])) {
@@ -115,7 +117,7 @@ static e_type	getType(std::string str) {
 	return (NONE);
 }
 
-std::string print_float(float nb) {
+std::string print_float(double nb) {
 	std::ostringstream	strout;
 	std::string			str;
 
@@ -131,10 +133,10 @@ static void	convertChar(char c) {
 	if (!isprint(c))
 		std::cout << "  char: Non displayable" << std::endl;
 	else
-		std::cout << "  char: " << c << std::endl;
-	std::cout << "   int: " << static_cast<int>(c) << std::endl;
-	std::cout << " float: " << print_float(static_cast<float>(c)) << "f" << std::endl;
-	std::cout << "double: " << print_float(static_cast<double>(c)) << std::endl;
+		std::cout << BOLD << "  char: " << END_STYLE << THIN << c << END_STYLE << std::endl;
+	std::cout << BOLD << "   int: " << END_STYLE << THIN << static_cast<int>(c) << END_STYLE << std::endl;
+	std::cout << BOLD << " float: " << END_STYLE << THIN << print_float(static_cast<float>(c)) << "f" << END_STYLE << std::endl;
+	std::cout << BOLD << "double: " << END_STYLE << THIN << print_float(static_cast<double>(c)) << END_STYLE << std::endl;
 }
 
 static bool	intOverflow(std::string str) {	
@@ -160,61 +162,96 @@ static bool	intOverflow(std::string str) {
 static void	convertInt(std::string str) {
 	bool	int_overflow = intOverflow(str);
 	int		nb;
-	double	nb_d;
 
 	if (!int_overflow)
 		nb = std::atoi(str.c_str());
-	else
-		nb_d = std::atof(str.c_str());
 	if (!int_overflow) {
 		if (isascii(nb)) {
 			if (isprint(nb))
-				std::cout << "  char: " << static_cast<char>(nb) << std::endl;
+				std::cout << BOLD << "  char: " << END_STYLE << THIN << static_cast<char>(nb) << END_STYLE << std::endl;
 			else
-				std::cout << "  char: Non displayable" << std::endl;
+				std::cout << BOLD << "  char: " << END_STYLE << THIN << "Non displayable" << END_STYLE << std::endl;
 		} else
-			std::cout << "  char: Impossible" << std::endl;
-		std::cout << "   int: " << nb << std::endl;
-		std::cout << " float: " << print_float(static_cast<float>(nb)) << "f" << std::endl;
-		std::cout << "double: " << print_float(static_cast<double>(nb)) << std::endl;
+			std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << nb << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << print_float(static_cast<float>(nb)) << "f" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << print_float(static_cast<double>(nb)) << END_STYLE << std::endl;
 	}
 	else {
-		std::cout << "  char: Impossible" << std::endl;
-		std::cout << "   int: Impossible" << std::endl;
-		if (nb_d == 0) {
-			std::cout << " float: Impossible" << std::endl;
-			std::cout << "double: Impossible" << std::endl;	
-		} else {
-			std::cout << " float: " << print_float(static_cast<float>(nb_d)) << "f" << std::endl;
-			std::cout << "double: " << print_float(nb_d) << std::endl;	
-		}
+		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
 	}
 }
 
 static void	convertFloat(std::string str) {
 	bool	int_overflow = false;
-	float	nb;
-
-	nb = std::atof(str.c_str());
+	float	nb;	
+	
+	errno = 0;
+	nb = std::strtof(str.c_str(), NULL);
+	if (errno == ERANGE) {
+		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		return ;
+	}
 	if (nb < static_cast<float>(INT_MIN) || nb > static_cast<float>(INT_MAX))
 		int_overflow = true;
 	if (!int_overflow) {
 		if (isascii(nb)) {
 			if (isprint(nb))
-				std::cout << "  char: " << static_cast<char>(nb) << std::endl;
+				std::cout << BOLD << "  char: " << END_STYLE << THIN << static_cast<char>(nb) << END_STYLE << std::endl;
 			else
-				std::cout << "  char: Non displayable" << std::endl;
+				std::cout << BOLD << "  char: " << END_STYLE << THIN << "Non displayable" << END_STYLE << std::endl;
 		} else
-			std::cout << "  char: Impossible" << std::endl;
-		std::cout << "   int: " << static_cast<int>(nb) << std::endl;
-		std::cout << " float: " << print_float(nb) << "f" << std::endl;
-		std::cout << "double: " << print_float(static_cast<double>(nb)) << std::endl;
+			std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << static_cast<int>(nb) << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << print_float(nb) << "f" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << print_float(static_cast<double>(nb)) << END_STYLE << std::endl;
 	}
 	else {
-		std::cout << "  char: Impossible" << std::endl;
-		std::cout << "   int: Impossible" << std::endl;
-		std::cout << " float: " << print_float(nb) << "f" << std::endl;
-		std::cout << "double: " << print_float(static_cast<double>(nb)) << std::endl;	
+		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << print_float(nb) << "f" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << print_float(static_cast<double>(nb)) << END_STYLE << std::endl;	
+	}
+}
+
+static void	convertDouble(std::string str) {
+	bool	int_overflow = false;
+	double	nb;
+
+	errno = 0;
+	nb = std::strtod(str.c_str(), NULL);
+	if (errno == ERANGE) {
+		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		return ;
+	}
+	if (nb < static_cast<double>(INT_MIN) || nb > static_cast<double>(INT_MAX))
+		int_overflow = true;
+	if (!int_overflow) {
+		if (isascii(nb)) {
+			if (isprint(nb))
+				std::cout << BOLD << "  char: " << END_STYLE << THIN << static_cast<char>(nb) << END_STYLE << std::endl;
+			else
+				std::cout << BOLD << "  char: " << END_STYLE << THIN << "Non displayable" << END_STYLE << std::endl;
+		} else
+			std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << static_cast<int>(nb) << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << print_float(static_cast<float>(nb)) << "f" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << print_float(nb) << END_STYLE << std::endl;
+	}
+	else {
+		std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+		std::cout << BOLD << " float: " << END_STYLE << THIN << print_float(static_cast<float>(nb)) << "f" << END_STYLE << std::endl;
+		std::cout << BOLD << "double: " << END_STYLE << THIN << print_float(nb) << END_STYLE << std::endl;
 	}
 }
 
@@ -231,12 +268,13 @@ void	ScalarConverter::convert(const std::string str) {
 			convertFloat(str);
 			break;
 		case DOUBLE:
-			std::cout << "DOUBLE";
+			convertDouble(str);
 			break;
 		default:
-			std::cout << "NONE";
+			std::cout << BOLD << "  char: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+			std::cout << BOLD << "   int: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+			std::cout << BOLD << " float: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
+			std::cout << BOLD << "double: " << END_STYLE << THIN << "Impossible" << END_STYLE << std::endl;
 			break;
 	}
-	std::cout << " <== \"" << str << "\"" << std::endl;
 }
-
