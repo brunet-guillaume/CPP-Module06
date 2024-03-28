@@ -6,7 +6,7 @@
 #    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/14 14:06:15 by gbrunet           #+#    #+#              #
-#    Updated: 2024/03/28 11:49:43 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/03/28 11:50:20 by gbrunet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ _THIN = \033[2m
 
 _END = \033[0m
 
-NAME = ex01
+NAME = ex02
 
 CC = c++
 
@@ -36,7 +36,7 @@ SRC_DIR = sources/
 
 OBJ_DIR = objects/
 
-SRC = main Serializer
+SRC = main
 
 SRC_FILES = $(addprefix $(SRC_DIR), $(addsuffix .cpp, $(SRC)))
 
